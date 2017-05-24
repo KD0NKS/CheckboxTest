@@ -1,0 +1,68 @@
+﻿@using CheckboxTest.Helpers
+
+@model  CheckboxTest.Models.TestViewModel
+
+@{
+    if(this.ViewContext.FormContext == null) {
+        this.ViewContext.FormContext = new FormContext();
+    }
+
+    ViewBag.Title = "Home Page";
+
+    List<SelectListItem> cbOptions = ViewBag.SelectOptions;
+}
+
+<div class="jumbotron">
+    <h1>Checkbox Test</h1>
+    <p class="lead">Testing validation of a group of checkboxes to make sure one is selected.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        @using(Html.BeginForm("FormTest", "Home", FormMethod.Post)) {
+            <h2>All you have to do is select at least one of these.</h2>
+            <h5>That's all we're asking.  Just select at least one.</h5>
+
+            <p>
+                @foreach(var item in cbOptions) {
+                    @Html.CheckBoxFor(m => item.Selected, new {
+                        id = item.Value
+                        , @Value = item.Value
+                        , @Name = "RequiredGroupTest"
+                        , @class = "checkbox-inline checkbox required-group"
+                        , data_val = "true"
+                    })
+
+                    @Html.Label(item.Text)
+
+                    <br />
+                }
+
+                @Html.ValidationMessageFor(model => model.RequiredGroupTest)
+            </p>
+
+            @Html.CheckboxListFor(model => model.RequiredGroupTest, model => cbOptions)
+
+            <p>
+                <input type="submit" value="Save" />
+            </p>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        (function ($) {
+            $.validator.addMethod('requiredarray', function (value, element, params) {
+                return $('input[name=' + $(element).attr('name') + ']:checked').length > 0;
+            }, 'Please select at least one');
+
+            $.validator.addClassRules('required-group', { 'requiredarray': true });
+
+            var errorMessage = $('.required-group').eq(0).data('val-requiredarray');
+            if (errorMessage && errorMessage !== "") {
+                $.validator.messages.requiredarray = errorMessage;
+            }
+        })(jQuery);
+    </script>
+}
